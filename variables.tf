@@ -14,22 +14,53 @@ variable "location" {
   description = "Region where the resources are created."
 }
 
+variable "tier" {
+  description = "Redis tier setting Basic, Standard or Premium"
+  default     = "Premium" 
+}
+
 # ###############
 # optional values
 # ###############
 
-variable "tier_settings" {
+variable "family" {
   type        = "map"
-  description = "Redis tier settings"
+  description = "Redis tier family.  "
 
   default = {
-    family   = "C" # 
-    sku_name = "Basic"
-    capacity = 0
-  }
+    	Basic    = "C"
+    	Standard = "C"
+        Premium  = "P"
+    }
+}
+
+variable "capacity" {
+  description = "Size of redis cache to deploy"
+  default     = 1 
+}
+
+variable "shard_count" {
+  description = "Number of shards for Redis cluster configuration"
+  default = 2
+}
+
+variable "redis_configuration" {
+  description = "Redis configuration"
+  type = "list"
+
+  default = [{
+    maxmemory_reserved = 2
+    maxmemory_delta    = 2
+    maxmemory_policy   = "allkeys-lru"	
+  }] 
 }
 
 variable "non_ssl_port" {
   description = "Enable non SSL port of redis"
   default     = "false"
+}
+
+variable "enable_cluster" {
+  description = "Enable Redis cluster configurations in Premium tier" 
+  default = "true"
 }
