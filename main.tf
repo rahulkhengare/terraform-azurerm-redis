@@ -7,6 +7,7 @@ terraform {
 }
 
 resource "random_id" "redis-sa" {
+  count   = "${(var.tier == "Premium" && var.enable_backup == "true" ? 1 : 0)}"
   keepers = {
     redis-sa = "${var.name}"
   }
