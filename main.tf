@@ -35,7 +35,7 @@ resource "azurerm_redis_cache" "redis" {
 
 # Redis Premium tier with clustering 
 resource "azurerm_redis_cache" "redis-cluster" {
-  count               = "${(var.tier == "Premium" && var.enable_cluster == "true" ? 1 : 0)}"
+  count               = "${(var.tier == "Premium" && var.enable_cluster == "true" && var.enable_backup == "false" ? 1 : 0)}"
   name                = "${var.name}"
   location            = "${azurerm_resource_group.redis.location}"
   resource_group_name = "${azurerm_resource_group.redis.name}"
@@ -63,7 +63,7 @@ resource "azurerm_storage_account" "redis-backup-sa" {
 }
 
 resource "azurerm_redis_cache" "redis-backup" {
-  count               = "${(var.tier == "Premium" && var.enable_backup == "true" ? 1 : 0)}"
+  count               = "${(var.tier == "Premium" && var.enable_cluster != "true" && var.enable_backup == "true" ? 1 : 0)}"
   name                = "${var.name}"
   location            = "${azurerm_resource_group.redis.location}"
   resource_group_name = "${azurerm_resource_group.redis.name}"
@@ -75,6 +75,28 @@ resource "azurerm_redis_cache" "redis-backup" {
 			rdb_backup_enabled              = "true"
 			rdb_backup_frequency            = "${var.redis_configuration["rdb_backup_frequency"]}"
 			rdb_backup_max_snapshot_count   = "${var.redis_configuration["rdb_backup_max_snapshot_count"]}"
+			rdb_storage_connection_string = "DefaultEndpointsProtocol=https;BlobEndpoint=${azurerm_storage_account.redis-backup-sa.primary_blob_endpoint};AccountName=${azurerm_storage_account.redis-backup-sa.name};AccountKey=${azurerm_storage_account.redis-backup-sa.primary_access_key}"
+  }
+}
+
+resource "azurerm_redis_cache" "redis-cluster-backup" {
+  count               = "${(var.tier == "Premium" && var.enable_cluster == "true" && var.enable_backup == "true" ? 1 : 0)}"
+  name                = "${var.name}"
+  location            = "${azurerm_resource_group.redis.location}"
+  resource_group_name = "${azurerm_resource_group.redis.name}"
+  capacity            = "${var.capacity}"
+  family              = "${lookup(var.family, var.tier)}"
+  sku_name            = "${var.tier}"
+  enable_non_ssl_port = "${var.non_ssl_port}"
+
+  shard_count         = "${var.shard_count}"
+  redis_configuration = {
+			maxmemory_reserved            = "${var.redis_configuration["maxmemory_reserved"]}"
+			maxmemory_delta               = "${var.redis_configuration["maxmemory_delta"]}"
+			maxmemory_policy              = "${var.redis_configuration["maxmemory_policy"]}"
+			rdb_backup_enabled            = "true"
+			rdb_backup_frequency          = "${var.redis_configuration["rdb_backup_frequency"]}"
+			rdb_backup_max_snapshot_count = "${var.redis_configuration["rdb_backup_max_snapshot_count"]}"
 			rdb_storage_connection_string = "DefaultEndpointsProtocol=https;BlobEndpoint=${azurerm_storage_account.redis-backup-sa.primary_blob_endpoint};AccountName=${azurerm_storage_account.redis-backup-sa.name};AccountKey=${azurerm_storage_account.redis-backup-sa.primary_access_key}"
   }
 }

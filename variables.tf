@@ -16,7 +16,7 @@ variable "location" {
 
 variable "tier" {
   description = "Redis tier setting Basic, Standard or Premium"
-  default     = "Premium" 
+  default     = "Basic"
 }
 
 # ###############
@@ -69,5 +69,5 @@ variable "enable_cluster" {
 
 variable "enable_backup" {
   description = "Enable Redis backup in Premium tier"
-  default = "true"
+  default = "false"
 }
