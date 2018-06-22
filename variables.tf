@@ -46,13 +46,15 @@ variable "shard_count" {
 
 variable "redis_configuration" {
   description = "Redis configuration"
-  type = "list"
+  type = "map"
 
-  default = [{
-    maxmemory_reserved = 2
-    maxmemory_delta    = 2
-    maxmemory_policy   = "allkeys-lru"	
-  }] 
+  default = {
+    maxmemory_reserved            = 2
+    maxmemory_delta               = 2
+    maxmemory_policy              = "allkeys-lru"
+    rdb_backup_frequency          = 60
+    rdb_backup_max_snapshot_count = 1
+  }
 }
 
 variable "non_ssl_port" {
@@ -62,5 +64,10 @@ variable "non_ssl_port" {
 
 variable "enable_cluster" {
   description = "Enable Redis cluster configurations in Premium tier" 
+  default = "false"
+}
+
+variable "enable_backup" {
+  description = "Enable Redis backup in Premium tier"
   default = "true"
 }
